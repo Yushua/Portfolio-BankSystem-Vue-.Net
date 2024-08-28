@@ -1,36 +1,19 @@
-namespace MyApp.Models{
-        /*
-        you can make a private functonn that gets and sets these values when creating to make it more secure.
-        actions outside cannot affect the class itself them, only the functions given can be used, and those can be protected.
-        for example, so access the function, one has to... have priviliges to use it.
-    */
+namespace MyApp.Models
+{
+    public class Computer
+    {
+        public int ComputerId { get; set; } // Maps to ComputerId column
+        public string Motherboard { get; set; } = string.Empty; // Maps to Motherboard column
+        public int CpuCores { get; set; } // Maps to CPUCores column
+        public bool HasWifi { get; set; } // Maps to HasWifi column
+        public DateTime ReleaseDate { get; set; } // Maps to ReleaseDate column
+        public decimal Price { get; set; } // Maps to Price column
+        public string VideoCard { get; set; } = string.Empty; // Maps to VideoCard column
 
-    public class Computer {
-        private string motherboard = "";
-        private string videoCard = "";
-        private int CPUCores = 0;
-
-        private bool HasWifi = false;
-        private DateOnly ReleaseDate = new DateOnly();
-        private decimal Price = new decimal(0);
-        
-
-        public void SetMotherboard(string value)
+        public override string ToString()
         {
-            motherboard = value;
-        }
-        public string GetMotherboard()
-        {
-            return this.motherboard;
-        }
-
-        public void SetVideoCard(string value)
-        {
-            videoCard = value;
-        }
-        public string GetVideoCard()
-        {
-            return this.videoCard;
+            return $"Motherboard: {Motherboard}\nVideoCard: {VideoCard}\nCPU Cores: {CpuCores}\n" +
+                   $"Has Wifi: {HasWifi}\nRelease Date: {ReleaseDate:yyyy-MM-dd}\nPrice: {Price:C}\n";
         }
     }
 }
