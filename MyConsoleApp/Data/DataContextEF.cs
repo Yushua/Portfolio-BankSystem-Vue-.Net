@@ -1,17 +1,23 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using MyApp.Models;
 
 namespace MyApp.Data
 {
     public class DataContextEF : DbContext
     {
+        private IConfiguration _config;
+        public DataContextEF(IConfiguration config){
+            _config = config;
+        }
+        
         public DbSet<Computer> Computers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=localhost;Database=DotNetCourseDatabase;TrustServerCertificate=true;Trusted_Connection=true;",
+                optionsBuilder.UseSqlServer(_config.GetConnectionString("DefaultConnection"),
                     options => options.EnableRetryOnFailure());
             }
         }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using MyApp.Data;
 using MyApp.Models;
 
@@ -11,12 +13,17 @@ namespace MyApp
     {
         static void Main(string[] args)
         {
-            DataContextDapper dapper = new DataContextDapper();
-            DataContextEF entityFramework = new DataContextEF();
+            IConfiguration config = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appSettings.json")
+                .Build();
+
+            DataContextDapper dapper = new DataContextDapper(config);
+            DataContextEF entityFramework = new DataContextEF(config);
 
             Computer myComputer = new Computer
             {
-                Motherboard = "HIghter3",
+                Motherboard = "HIghter4",
                 VideoCard = "new VideoCard",
                 CpuCores = 5,
                 HasWifi = true,
@@ -26,8 +33,46 @@ namespace MyApp
             // InsertSql(dapper, myComputer);
             // SelectSql(dapper, myComputer);
 
-            InsertEF(entityFramework, myComputer);
-            SelectEF(entityFramework);
+            // InsertEF(entityFramework, myComputer);
+            // SelectEF(entityFramework);
+        }
+
+
+        static void ft_ReadFile(DataContextDapper dapper, Computer myComputer)
+        {
+
+            string checkSql = @"SELECT COUNT(*)
+                                FROM TutorialAppSchema.Computer
+                                WHERE Motherboard = @Motherboard";
+
+            // Retrieve count as int
+            int count = dapper.LoadDataSingle<int>(checkSql, new { Motherboard = myComputer.Motherboard });
+
+            if (count > 0)
+            {
+                Console.WriteLine("The record already exists.");
+            }
+            else
+            {
+                // Define the SQL insert command with parameterized values
+                string insertSql = @"INSERT INTO TutorialAppSchema.Computer (
+                    ComputerId,
+                    Motherboard,
+                    VideoCard,
+                    CPUCores,
+                    HasWifi,
+                    ReleaseDate,
+                    Price
+                ) VALUES (
+                    @ComputerId,
+                    @Motherboard,
+                    @VideoCard,
+                    @CPUCores,
+                    @HasWifi,
+                    @ReleaseDate,
+                    @Price
+                )";
+            }
         }
 
         static void InsertSql(DataContextDapper dapper, Computer myComputer)
