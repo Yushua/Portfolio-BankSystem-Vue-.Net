@@ -21,6 +21,10 @@ namespace MyApp
             DataContextDapper dapper = new DataContextDapper(config);
             DataContextEF entityFramework = new DataContextEF(config);
 
+            ft_MyComputer(dapper, entityFramework);
+        }
+
+        static void ft_MyComputer(DataContextDapper dapper, DataContextEF entityFramework){
             Computer myComputer = new Computer
             {
                 Motherboard = "HIghter4",
@@ -30,22 +34,80 @@ namespace MyApp
                 ReleaseDate = DateTime.Now, // Directly using DateTime
                 Price = 933.90m
             };
-            // InsertSql(dapper, myComputer);
-            // SelectSql(dapper, myComputer);
+
+            string checkSql = @"SELECT COUNT(*)
+                                FROM TutorialAppSchema.Computer
+                                WHERE Motherboard = @Motherboard";
+
+            // Define the SQL insert command with parameterized values
+                string insertSql = @"INSERT INTO TutorialAppSchema.Computer (
+                    ComputerId,
+                    Motherboard,
+                    VideoCard,
+                    CPUCores,
+                    HasWifi,
+                    ReleaseDate,
+                    Price
+                ) VALUES (
+                    @ComputerId,
+                    @Motherboard,
+                    @VideoCard,
+                    @CPUCores,
+                    @HasWifi,
+                    @ReleaseDate,
+                    @Price)";
+
+                string sqlSelect = @"SELECT
+                ComputerId,
+                Motherboard,
+                VideoCard,
+                CPUCores,
+                HasWifi,
+                ReleaseDate,
+                Price
+            FROM TutorialAppSchema.Computer";
+
+            /*
+                technically, it now all depends on what I want to do, do I want to patch
+                a single value? do want to return everything? do I want to gain something, change something?
+                do I want to check something?
+
+                this can all be done with the format above WITH that statement. creating, adding, selecting, etc
+            */
+
+            // InsertSql(dapper, myComputer, checkSql, insertSql);
+            // SelectSql(dapper, myComputer, checkSql);
 
             // InsertEF(entityFramework, myComputer);
             // SelectEF(entityFramework);
+
+            // ft_WriteFile(myComputer, insertSql, "all", "log.txt", true);
+            // ft_WriteFile(myComputer, insertSql, "stream", "log.txt", true);
+            // ft_WriteFile(myComputer, insertSql, "stream", "log.txt", true);
+
+            // Console.WriteLine(ft_ReadFile("log.txt"));
         }
 
+        static void ft_WriteFile(Computer myComputer, string insertSql, string type, string fileName, bool newLine){   
+            string contentToWrite = newLine ? Environment.NewLine + insertSql + Environment.NewLine : insertSql;
+            if (type == "all"){
+                File.WriteAllText(fileName, contentToWrite);
+            }
+            else if (type == "stream"){
+                using StreamWriter openFile = new(fileName, append: true);
+                openFile.WriteLine(contentToWrite);
+                openFile.Close();
+            }
+        }
 
-        static void ft_ReadFile(DataContextDapper dapper, Computer myComputer)
-        {
+        static string ft_ReadFile(string fileName){
+            return File.ReadAllText(fileName);
+        }
 
-            string checkSql = @"SELECT COUNT(*)
-                                FROM TutorialAppSchema.Computer
-                                WHERE Motherboard = @Motherboard";
-
-            // Retrieve count as int
+        static void InsertSql(DataContextDapper dapper,
+        Computer myComputer,
+        string checkSql,
+        string insertSql){
             int count = dapper.LoadDataSingle<int>(checkSql, new { Motherboard = myComputer.Motherboard });
 
             if (count > 0)
@@ -54,63 +116,6 @@ namespace MyApp
             }
             else
             {
-                // Define the SQL insert command with parameterized values
-                string insertSql = @"INSERT INTO TutorialAppSchema.Computer (
-                    ComputerId,
-                    Motherboard,
-                    VideoCard,
-                    CPUCores,
-                    HasWifi,
-                    ReleaseDate,
-                    Price
-                ) VALUES (
-                    @ComputerId,
-                    @Motherboard,
-                    @VideoCard,
-                    @CPUCores,
-                    @HasWifi,
-                    @ReleaseDate,
-                    @Price
-                )";
-            }
-        }
-
-        static void InsertSql(DataContextDapper dapper, Computer myComputer)
-        {
-
-            // Check if the record already exists
-            string checkSql = @"SELECT COUNT(*)
-                                FROM TutorialAppSchema.Computer
-                                WHERE Motherboard = @Motherboard";
-
-            // Retrieve count as int
-            int count = dapper.LoadDataSingle<int>(checkSql, new { Motherboard = myComputer.Motherboard });
-
-            if (count > 0)
-            {
-                Console.WriteLine("The record already exists.");
-            }
-            else
-            {
-                // Define the SQL insert command with parameterized values
-                string insertSql = @"INSERT INTO TutorialAppSchema.Computer (
-                    ComputerId,
-                    Motherboard,
-                    VideoCard,
-                    CPUCores,
-                    HasWifi,
-                    ReleaseDate,
-                    Price
-                ) VALUES (
-                    @ComputerId,
-                    @Motherboard,
-                    @VideoCard,
-                    @CPUCores,
-                    @HasWifi,
-                    @ReleaseDate,
-                    @Price
-                )";
-
                 // Directly use DateTime without conversion
                 dapper.ExecuteSql(insertSql, new
                 {
@@ -127,9 +132,7 @@ namespace MyApp
             }
         }
 
-        static void InsertEF(DataContextEF entityFramework, Computer myComputer)
-        {
-            // Check if a computer with the same motherboard already exists
+        static void InsertEF(DataContextEF entityFramework, Computer myComputer){
             bool exists = entityFramework.Computers
                 .Any(c => c.Motherboard == myComputer.Motherboard);
 
@@ -145,18 +148,10 @@ namespace MyApp
                 Console.WriteLine("Record Inserted Successfully");
             }
         }
-        static void SelectSql(DataContextDapper dapper, Computer myComputer)
+        static void SelectSql(DataContextDapper dapper,
+        Computer myComputer,
+        string sqlSelect)
         {
-            string sqlSelect = @"SELECT
-                ComputerId,
-                Motherboard,
-                VideoCard,
-                CPUCores,
-                HasWifi,
-                ReleaseDate,
-                Price
-            FROM TutorialAppSchema.Computer";
-
             IEnumerable<Computer>? computers = dapper.LoadData<Computer>(sqlSelect);
             if (computers != null){
                 foreach (Computer singleComputer in computers)

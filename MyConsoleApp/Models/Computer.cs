@@ -1,5 +1,6 @@
 namespace MyApp.Models
 {
+    
     public class Computer
     {
         public int ComputerId { get; set; } // Maps to ComputerId column
