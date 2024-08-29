@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MyApp.Data;
 using MyApp.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace MyApp
 {
@@ -25,19 +28,15 @@ namespace MyApp
         }
 
         static void ft_MyComputer(DataContextDapper dapper, DataContextEF entityFramework){
-            Computer myComputer = new Computer
-            {
-                Motherboard = "HIghter4",
-                VideoCard = "new VideoCard",
-                CpuCores = 5,
-                HasWifi = true,
-                ReleaseDate = DateTime.Now, // Directly using DateTime
-                Price = 933.90m
-            };
-
-            string checkSql = @"SELECT COUNT(*)
-                                FROM TutorialAppSchema.Computer
-                                WHERE Motherboard = @Motherboard";
+            // Computer myComputer = new Computer
+            // {
+            //     Motherboard = "HIghter4",
+            //     VideoCard = "new VideoCard",
+            //     CpuCores = 5,
+            //     HasWifi = true,
+            //     ReleaseDate = DateTime.Now, // Directly using DateTime
+            //     Price = 933.90m
+            // };
 
             // Define the SQL insert command with parameterized values
                 string insertSql = @"INSERT INTO TutorialAppSchema.Computer (
@@ -75,20 +74,120 @@ namespace MyApp
                 this can all be done with the format above WITH that statement. creating, adding, selecting, etc
             */
 
-            // InsertSql(dapper, myComputer, checkSql, insertSql);
-            // SelectSql(dapper, myComputer, checkSql);
-
-            // InsertEF(entityFramework, myComputer);
-            // SelectEF(entityFramework);
+            // ft_MyComputerDapper(myComputer, dapper, checkSql, false, insertSql, true);
+            // ft_MyComputerEntityFramework(myComputer, entityFramework);
 
             // ft_WriteFile(myComputer, insertSql, "all", "log.txt", true);
             // ft_WriteFile(myComputer, insertSql, "stream", "log.txt", true);
             // ft_WriteFile(myComputer, insertSql, "stream", "log.txt", true);
 
-            // Console.WriteLine(ft_ReadFile("log.txt"));
+            string jsonFile = ft_ReadFile("Computers.json");
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            IEnumerable<Computer>? computersNewtonSoft = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<Computer>>(jsonFile, options);
+
+            IEnumerable<Computer>? computersDeserialise = JsonConvert.DeserializeObject<IEnumerable<Computer>>(jsonFile);
+
+            if (computersNewtonSoft != null)
+            {
+                foreach (var computer in computersNewtonSoft)
+                {
+                    Console.WriteLine($"ComputerId: {computer.ComputerId}, Motherboard: {computer.Motherboard}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Deserialization failed or returned null.");
+            }
+
+            if (computersNewtonSoft != null) 
+            {
+                foreach (Computer computer in computersNewtonSoft)
+                {
+                    // Log the motherboard value to check what’s being queried
+                    // Console.WriteLine($"Checking motherboard: {computer}");
+                    Console.WriteLine($"Checking motherboard: {computer.Motherboard}");
+
+                    string checkSql = @"SELECT COUNT(*)
+                                        FROM TutorialAppSchema.Computer
+                                        WHERE Motherboard = @Motherboard";
+
+                    // Execute the check SQL to see if the computer exists
+                    int count = dapper.LoadDataSingle<int>(checkSql, new { Motherboard = computer.Motherboard });
+
+                    if (count > 0)
+                    {
+                        Console.WriteLine($"Record with motherboard '{computer.Motherboard}' already exists.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Inserting new record with motherboard: {computer.Motherboard}");
+
+                        string computerInsertSql = @"INSERT INTO TutorialAppSchema.Computer (
+                                                        Motherboard,
+                                                        VideoCard,
+                                                        CPUCores,
+                                                        HasWifi,
+                                                        ReleaseDate,
+                                                        Price
+                                                    ) VALUES (
+                                                        @Motherboard,
+                                                        @VideoCard,
+                                                        @CPUCores,
+                                                        @HasWifi,
+                                                        @ReleaseDate,
+                                                        @Price)";
+
+                        dapper.ExecuteSql(computerInsertSql, new
+                        {
+                            Motherboard = computer.Motherboard,
+                            VideoCard = computer.VideoCard,
+                            CPUCores = computer.CpuCores,
+                            HasWifi = computer.HasWifi ? 1 : 0,
+                            ReleaseDate = computer.ReleaseDate,
+                            Price = computer.Price
+                        });
+
+                        Console.WriteLine("Record Inserted Successfully");
+                    }
+                }
+            }
+
+            // JsonSerializerSettings settings = new JsonSerializerSettings(){
+            //     ContractResolver = new CamelCasePropertyNamesContractResolver()
+            // };
+
+            // string computersCon = JsonConvert.SerializeObject(computersNewtonSoft, settings);
+
+            // ft_WriteFile(computersCon, "all", "computerCopySer.txt", false);
+
+            // JsonSerializerOptions option = new JsonSerializerOptions(){
+            //     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            // };
+            
+            // string computersVer = System.Text.Json.JsonSerializer.Serialize(computersDeserialise, option);
+
+            // ft_WriteFile(computersVer, "all", "computerCoptCon.txt", false);
         }
 
-        static void ft_WriteFile(Computer myComputer, string insertSql, string type, string fileName, bool newLine){   
+        static void ft_MyComputerDapper(Computer myComputer, DataContextDapper dapper, string checkSql, bool check, string insertSql, bool insert){
+            if (insert){
+                InsertSql(dapper, myComputer, checkSql, insertSql);
+            } if (check){
+                SelectSql(dapper, myComputer, checkSql);
+            }
+        }
+
+        static void ft_MyComputerEntityFramework(Computer myComputer, DataContextEF entityFramework){
+            InsertEF(entityFramework, myComputer);
+            SelectEF(entityFramework);
+        }
+
+        static void ft_WriteFile(string insertSql, string type, string fileName, bool newLine){   
             string contentToWrite = newLine ? Environment.NewLine + insertSql + Environment.NewLine : insertSql;
             if (type == "all"){
                 File.WriteAllText(fileName, contentToWrite);
@@ -104,10 +203,9 @@ namespace MyApp
             return File.ReadAllText(fileName);
         }
 
-        static void InsertSql(DataContextDapper dapper,
-        Computer myComputer,
-        string checkSql,
-        string insertSql){
+        static void InsertSql(DataContextDapper dapper, Computer myComputer, string checkSql, string insertSql)
+        {
+            // Use Dapper to execute a scalar SQL statement and get the count of records with the same motherboard.
             int count = dapper.LoadDataSingle<int>(checkSql, new { Motherboard = myComputer.Motherboard });
 
             if (count > 0)
@@ -116,14 +214,12 @@ namespace MyApp
             }
             else
             {
-                // Directly use DateTime without conversion
                 dapper.ExecuteSql(insertSql, new
                 {
-                    ComputerId = myComputer.ComputerId,
                     Motherboard = myComputer.Motherboard,
                     VideoCard = myComputer.VideoCard,
                     CPUCores = myComputer.CpuCores,
-                    HasWifi = myComputer.HasWifi,
+                    HasWifi = myComputer.HasWifi ? 1 : 0,
                     ReleaseDate = myComputer.ReleaseDate,
                     Price = myComputer.Price
                 });

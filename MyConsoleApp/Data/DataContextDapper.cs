@@ -18,16 +18,25 @@ namespace MyApp.Data
             return dbConnection.Query<T>(sql, parameters);
         }
 
-        public T LoadDataSingle<T>(string sql, object? parameters = null)
+        public int LoadDataSingle<T>(string sql, object parameters)
         {
-            using IDbConnection dbConnection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            return dbConnection.QuerySingleOrDefault<T>(sql, parameters);
+            using (IDbConnection dbConnection = CreateConnection())
+            {
+                return dbConnection.ExecuteScalar<int>(sql, parameters);
+            }
+        }
+        
+        public IDbConnection CreateConnection()
+        {
+            return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
         }
 
-        public bool ExecuteSql(string sql, object? parameters = null)
+        public void ExecuteSql(string sql, object parameters)
         {
-            using IDbConnection dbConnection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            return (dbConnection.Execute(sql, parameters) > 0);
+            using (IDbConnection dbConnection = CreateConnection())
+            {
+                dbConnection.Execute(sql, parameters);
+            }
         }
 
         public int ExecuteSqlWithRowCount(string sql, object? parameters = null)

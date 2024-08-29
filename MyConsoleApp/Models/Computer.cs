@@ -7,7 +7,7 @@ namespace MyApp.Models
         public string Motherboard { get; set; } = string.Empty; // Maps to Motherboard column
         public int CpuCores { get; set; } // Maps to CPUCores column
         public bool HasWifi { get; set; } // Maps to HasWifi column
-        public DateTime ReleaseDate { get; set; } // Maps to ReleaseDate column
+        public DateTime? ReleaseDate { get; set; } // Maps to ReleaseDate column
         public decimal Price { get; set; } // Maps to Price column
         public string VideoCard { get; set; } = string.Empty; // Maps to VideoCard column
 
