@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using AutoMapper;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +15,17 @@ namespace MyApp
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
+            Task firsttask = new Task(() => {
+                Thread.Sleep(100);
+                Console.WriteLine("Task 1");
+            });
+            Console.WriteLine("after Task 1");
+
+        }
+
+        static void ft_MyComputer(){
             IConfiguration config = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("appSettings.json")
@@ -24,10 +34,6 @@ namespace MyApp
             DataContextDapper dapper = new DataContextDapper(config);
             DataContextEF entityFramework = new DataContextEF(config);
 
-            ft_MyComputer(dapper, entityFramework);
-        }
-
-        static void ft_MyComputer(DataContextDapper dapper, DataContextEF entityFramework){
             // Computer myComputer = new Computer
             // {
             //     Motherboard = "HIghter4",
@@ -81,81 +87,70 @@ namespace MyApp
             // ft_WriteFile(myComputer, insertSql, "stream", "log.txt", true);
             // ft_WriteFile(myComputer, insertSql, "stream", "log.txt", true);
 
-            string jsonFile = ft_ReadFile("Computers.json");
+            string jsonFile = ft_ReadFile("ComputersSnake.json");
 
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
+            //used if you want to automate changing the values
+            // var mapper = new Mapper(new MapperConfiguration(cfg =>
+            // {
+            //     cfg.CreateMap<ComputerSnake, Computer>()
+            //         .ForMember(dest => dest.ComputerId, opt => opt.MapFrom(src => src.computer_id))
+            //         .ForMember(dest => dest.Motherboard, opt => opt.MapFrom(src => src.motherboard))
+            //         .ForMember(dest => dest.CpuCores, opt => opt.MapFrom(src => src.cpu_cores))
+            //         .ForMember(dest => dest.HasWifi, opt => opt.MapFrom(src => src.has_wifi))
+            //         .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => src.release_date))
+            //         .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.price))
+            //         .ForMember(dest => dest.VideoCard, opt => opt.MapFrom(src => src.video_card));
+            // }));
 
-            IEnumerable<Computer>? computersNewtonSoft = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<Computer>>(jsonFile, options);
+            // IEnumerable<ComputerSnake>? computerSystem = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<ComputerSnake>>(jsonFile);
 
-            IEnumerable<Computer>? computersDeserialise = JsonConvert.DeserializeObject<IEnumerable<Computer>>(jsonFile);
+            // if (computerSystem != null){
+            //     IEnumerable<Computer> computerResult = mapper.Map<IEnumerable<Computer>>(computerSystem);
 
-            if (computersNewtonSoft != null)
-            {
-                foreach (var computer in computersNewtonSoft)
-                {
-                    Console.WriteLine($"ComputerId: {computer.ComputerId}, Motherboard: {computer.Motherboard}");
+            //     foreach (Computer computer in computerResult){
+            //         Console.WriteLine(computer.Motherboard);
+            //     }
+            // }
+            IEnumerable<Computer>? computersDirect = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<Computer>>(jsonFile);
+
+            if (computersDirect != null){
+                foreach (Computer computer in computersDirect){
+                    Console.WriteLine(computer.Motherboard);
                 }
             }
-            else
-            {
-                Console.WriteLine("Deserialization failed or returned null.");
-            }
 
-            if (computersNewtonSoft != null) 
-            {
-                foreach (Computer computer in computersNewtonSoft)
-                {
-                    // Log the motherboard value to check what’s being queried
-                    // Console.WriteLine($"Checking motherboard: {computer}");
-                    Console.WriteLine($"Checking motherboard: {computer.Motherboard}");
+            // var options = new JsonSerializerOptions{
+            //     PropertyNameCaseInsensitive = true
+            // };
 
-                    string checkSql = @"SELECT COUNT(*)
-                                        FROM TutorialAppSchema.Computer
-                                        WHERE Motherboard = @Motherboard";
+            // IEnumerable<Computer>? computersNewtonSoft = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<Computer>>(jsonFile, options);
 
-                    // Execute the check SQL to see if the computer exists
-                    int count = dapper.LoadDataSingle<int>(checkSql, new { Motherboard = computer.Motherboard });
+            // IEnumerable<Computer>? computersDeserialise = JsonConvert.DeserializeObject<IEnumerable<Computer>>(jsonFile);
 
-                    if (count > 0)
-                    {
-                        Console.WriteLine($"Record with motherboard '{computer.Motherboard}' already exists.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Inserting new record with motherboard: {computer.Motherboard}");
+            // if (computersNewtonSoft != null){
+            //     foreach (var computer in computersNewtonSoft){
+            //         Console.WriteLine($"ComputerId: {computer.ComputerId}, Motherboard: {computer.Motherboard}");
+            //     }
+            // }
+            // else{
+            //     Console.WriteLine("Deserialization failed or returned null.");
+            // }
 
-                        string computerInsertSql = @"INSERT INTO TutorialAppSchema.Computer (
-                                                        Motherboard,
-                                                        VideoCard,
-                                                        CPUCores,
-                                                        HasWifi,
-                                                        ReleaseDate,
-                                                        Price
-                                                    ) VALUES (
-                                                        @Motherboard,
-                                                        @VideoCard,
-                                                        @CPUCores,
-                                                        @HasWifi,
-                                                        @ReleaseDate,
-                                                        @Price)";
+            // if (computersNewtonSoft != null) {
+            //     foreach (Computer computer in computersNewtonSoft){
+            //         // Log the motherboard value to check what’s being queried
+            //         // Console.WriteLine($"Checking motherboard: {computer}");
+            //         Console.WriteLine($"Checking motherboard: {computer.Motherboard}");
+            //                     string checkSql = @"SELECT COUNT(*)
+            //                     FROM TutorialAppSchema.Computer
+            //                     WHERE Motherboard = @Motherboard";
 
-                        dapper.ExecuteSql(computerInsertSql, new
-                        {
-                            Motherboard = computer.Motherboard,
-                            VideoCard = computer.VideoCard,
-                            CPUCores = computer.CpuCores,
-                            HasWifi = computer.HasWifi ? 1 : 0,
-                            ReleaseDate = computer.ReleaseDate,
-                            Price = computer.Price
-                        });
-
-                        Console.WriteLine("Record Inserted Successfully");
-                    }
-                }
-            }
+            //         // Execute the check SQL to see if the computer exists
+            //         int count = dapper.LoadDataSingle<int>(checkSql, new { Motherboard = computer.Motherboard });
+            //         ft_MyComputerDapper(computer, dapper, checkSql, false, count, true);
+                    
+            //     }
+            // }
 
             // JsonSerializerSettings settings = new JsonSerializerSettings(){
             //     ContractResolver = new CamelCasePropertyNamesContractResolver()
@@ -174,9 +169,9 @@ namespace MyApp
             // ft_WriteFile(computersVer, "all", "computerCoptCon.txt", false);
         }
 
-        static void ft_MyComputerDapper(Computer myComputer, DataContextDapper dapper, string checkSql, bool check, string insertSql, bool insert){
+        static void ft_MyComputerDapper(Computer myComputer, DataContextDapper dapper, string checkSql, bool check, int count, bool insert){
             if (insert){
-                InsertSql(dapper, myComputer, checkSql, insertSql);
+                InsertSql(dapper, myComputer, count);
             } if (check){
                 SelectSql(dapper, myComputer, checkSql);
             }
@@ -203,18 +198,32 @@ namespace MyApp
             return File.ReadAllText(fileName);
         }
 
-        static void InsertSql(DataContextDapper dapper, Computer myComputer, string checkSql, string insertSql)
+        static void InsertSql(DataContextDapper dapper, Computer myComputer, int count)
         {
-            // Use Dapper to execute a scalar SQL statement and get the count of records with the same motherboard.
-            int count = dapper.LoadDataSingle<int>(checkSql, new { Motherboard = myComputer.Motherboard });
-
             if (count > 0)
             {
-                Console.WriteLine("The record already exists.");
+                Console.WriteLine($"Record with motherboard '{myComputer.Motherboard}' already exists.");
             }
             else
             {
-                dapper.ExecuteSql(insertSql, new
+                Console.WriteLine($"Inserting new record with motherboard: {myComputer.Motherboard}");
+
+                string computerInsertSql = @"INSERT INTO TutorialAppSchema.Computer (
+                                                Motherboard,
+                                                VideoCard,
+                                                CPUCores,
+                                                HasWifi,
+                                                ReleaseDate,
+                                                Price
+                                            ) VALUES (
+                                                @Motherboard,
+                                                @VideoCard,
+                                                @CPUCores,
+                                                @HasWifi,
+                                                @ReleaseDate,
+                                                @Price)";
+
+                dapper.ExecuteSql(computerInsertSql, new
                 {
                     Motherboard = myComputer.Motherboard,
                     VideoCard = myComputer.VideoCard,

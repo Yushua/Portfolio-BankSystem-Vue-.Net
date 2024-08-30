@@ -77,3 +77,4 @@ C:\Users\flipy\OneDrive\Documents\GitHub\portfolio\Portfolio-BankSystem-Vue-.Net
 C:\Users\flipy\OneDrive\Documents\GitHub\portfolio\Portfolio-BankSystem-Vue-.Net\MyConsoleApp\bin\Debug\net8.0\Newtonsoft.Json.dll
 C:\Users\flipy\OneDrive\Documents\GitHub\portfolio\Portfolio-BankSystem-Vue-.Net\MyConsoleApp\bin\Debug\net8.0\Computers.json
 C:\Users\flipy\OneDrive\Documents\GitHub\portfolio\Portfolio-BankSystem-Vue-.Net\MyConsoleApp\bin\Debug\net8.0\appSettings.json
+C:\Users\flipy\OneDrive\Documents\GitHub\portfolio\Portfolio-BankSystem-Vue-.Net\MyConsoleApp\bin\Debug\net8.0\AutoMapper.dll

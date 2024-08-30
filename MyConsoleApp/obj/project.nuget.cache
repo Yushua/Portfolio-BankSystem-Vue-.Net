@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "OWZvK3/ez1Y=",
+  "dgSpecHash": "YyR5YgG//bk=",
   "success": true,
   "projectFilePath": "C:\\Users\\flipy\\OneDrive\\Documents\\GitHub\\portfolio\\Portfolio-BankSystem-Vue-.Net\\MyConsoleApp\\MyConsoleApp.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\flipy\\.nuget\\packages\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
     "C:\\Users\\flipy\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\flipy\\.nuget\\packages\\azure.identity\\1.11.3\\azure.identity.1.11.3.nupkg.sha512",
     "C:\\Users\\flipy\\.nuget\\packages\\dapper\\2.1.35\\dapper.2.1.35.nupkg.sha512",
