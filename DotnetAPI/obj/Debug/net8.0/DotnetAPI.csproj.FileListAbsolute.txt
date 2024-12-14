@@ -32,3 +32,4 @@ C:\Users\flipy\OneDrive\Documents\GitHub\portfolio\Portfolio-BankSystem-Vue-.Net
 C:\Users\flipy\OneDrive\Documents\GitHub\portfolio\Portfolio-BankSystem-Vue-.Net\DotnetAPI\obj\Debug\net8.0\DotnetAPI.pdb
 C:\Users\flipy\OneDrive\Documents\GitHub\portfolio\Portfolio-BankSystem-Vue-.Net\DotnetAPI\obj\Debug\net8.0\DotnetAPI.genruntimeconfig.cache
 C:\Users\flipy\OneDrive\Documents\GitHub\portfolio\Portfolio-BankSystem-Vue-.Net\DotnetAPI\obj\Debug\net8.0\ref\DotnetAPI.dll
+C:\Users\flipy\OneDrive\Documents\GitHub\portfolio\Portfolio-BankSystem-Vue-.Net\DotnetAPI\bin\Debug\net8.0\launchSettings.json
